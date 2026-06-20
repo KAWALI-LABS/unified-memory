@@ -394,6 +394,9 @@
       <li><a href="#consent">Consent Demo</a></li>
     </ul>
     <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle" title="Toggle color mode" aria-label="Toggle dark mode">
+        <span id="themeIcon">🌙</span>
+      </button>
       <button class="nav-cta">Get Early Access</button>
     </div>
   </nav>
@@ -404,6 +407,7 @@
     <p class="hero-sub">UnifiedMemory collects your data from every platform — Gmail, GitHub, ChatGPT, Spotify, Instagram and 15+ more — and gives your AI agents secure, consent-controlled access via a single MCP endpoint.</p>
     <div class="hero-actions">
       <button class="btn-primary">Start Building Memory</button>
+      <button class="btn-secondary" onclick="window.open('https://github.com/M4F-S/unified-memory','_blank')">View on GitHub →</button>
     </div>
     <div class="scroll-indicator"><span>Scroll to explore</span><div class="scroll-dot"></div></div>
     <div class="hero-visual">
@@ -518,14 +522,45 @@
   </section>
   <footer>
     <span class="footer-logo">🧠 UnifiedMemory</span>
-    <span class="footer-text">AI Agents Berlin Hackathon 2026 · Built at 42Berlin</span>
+    <span class="footer-text">AI Agents Berlin Hackathon 2026 · Built at 42Berlin · github.com/M4F-S/unified-memory</span>
     <span class="footer-text">GDPR Compliant · NEAR · Circle · Cloudflare MCP</span>
   </footer>
 </div>
 <script>
   const html = document.documentElement;
-  html.classList.add('dark');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+  const toggleBtn = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+
+  function getStoredTheme() {
+    return localStorage.getItem('um-theme');
+  }
+  function getEffectiveTheme() {
+    const stored = getStoredTheme();
+    return stored || (prefersDark.matches ? 'dark' : 'light');
+  }
+  function applyTheme(theme) {
+    html.classList.remove('light', 'dark');
+    html.classList.add(theme);
+    themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    toggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    toggleBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+  }
+  applyTheme(getEffectiveTheme());
   window.addEventListener('load', () => document.body.classList.add('theme-ready'));
+  toggleBtn.addEventListener('click', () => {
+    const next = html.classList.contains('dark') ? 'light' : 'dark';
+    localStorage.setItem('um-theme', next);
+    applyTheme(next);
+  });
+  prefersDark.addEventListener('change', (e) => {
+    if (!getStoredTheme()) applyTheme(e.matches ? 'dark' : 'light');
+  });
+  toggleBtn.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    localStorage.removeItem('um-theme');
+    applyTheme(prefersDark.matches ? 'dark' : 'light');
+  });
 
   const platforms = [
     {icon:'📧',name:'Gmail'},{icon:'🐙',name:'GitHub'},{icon:'🤖',name:'ChatGPT'},
@@ -533,14 +568,14 @@
     {icon:'📸',name:'Instagram'},{icon:'🐦',name:'Twitter/X'},{icon:'💼',name:'LinkedIn'},
     {icon:'📓',name:'Notion'},{icon:'💼',name:'Slack'},{icon:'🎮',name:'Discord'},
     {icon:'✈️',name:'Telegram'},{icon:'👥',name:'Facebook'},{icon:'🎵',name:'TikTok'},
-    {icon:'▶️',name:'YouTube'},{icon:'❤️',name:'Apple Health'},{icon:'🤙',name:'Reddit'},
+    {icon:'▶️',name:'YouTube'},{icon:'❤️',name:'Apple Health'},{icon:'🤚',name:'Reddit'},
     {icon:'🏃',name:'Google Fit'},{icon:'✉️',name:'Apple Mail'}
   ];
   const loop = document.getElementById('logoLoop');
   [...platforms, ...platforms].forEach(p => {
     const el = document.createElement('div');
     el.className = 'platform-pill';
-    el.innerHTML = `<span>${p.icon}</span>${p.name}`;
+    el.innerHTML = '<span>'+p.icon+'</span>'+p.name;
     loop.appendChild(el);
   });
 
@@ -555,7 +590,6 @@
       card.style.setProperty('--my', ((e.clientY-r.top)/r.height*100).toFixed(1)+'%');
     });
   });
-
   const observer = new IntersectionObserver(entries => {
     entries.forEach((e, i) => {
       if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i*80);
