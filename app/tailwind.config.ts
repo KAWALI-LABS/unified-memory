@@ -9,6 +9,7 @@ const config: Config = {
           bg: "#0d0a1a",
           surface: "rgba(255,255,255,0.05)",
           "surface-solid": "rgba(255,255,255,0.07)",
+          "input-bg": "rgba(255,255,255,0.03)",
           border: "rgba(160,130,230,0.15)",
           primary: "#7C3AED",
           accent: "#06B6D4",

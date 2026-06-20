@@ -1,13 +1,36 @@
 "use client";
+import { useEffect } from "react";
 import { CONNECTORS } from "@/lib/api";
 
 export default function Onboard() {
   const totalMemories = CONNECTORS.reduce((sum, c) => sum + c.memories, 0);
   const connectedCount = CONNECTORS.filter((c) => c.connected).length;
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e, i) => {
+          if (e.isIntersecting)
+            setTimeout(() => e.target.classList.add("visible"), i * 50);
+        });
+      },
+      { threshold: 0.1 }
+    );
+    document.querySelectorAll(".blur-reveal").forEach((el) => observer.observe(el));
+    requestAnimationFrame(() => {
+      document.querySelectorAll(".blur-reveal").forEach((el, i) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          setTimeout(() => el.classList.add("visible"), i * 50);
+        }
+      });
+    });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="pt-24 px-6 pb-24 max-w-6xl mx-auto">
-      <div className="mb-10">
+      <div className="mb-10 blur-reveal">
         <h1 className="text-4xl font-extrabold mb-3">Connect your <span className="gradient-text">platforms</span></h1>
         <p className="text-um-text-secondary">Link your digital life sources to build your unified memory graph.</p>
       </div>
@@ -15,8 +38,8 @@ export default function Onboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Platform Grid */}
         <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {CONNECTORS.map((c) => (
-            <div key={c.platform} className="glass-card p-5 flex items-center justify-between">
+          {CONNECTORS.map((c, i) => (
+            <div key={c.platform} className="glass-card p-5 flex items-center justify-between blur-reveal" style={{ transitionDelay: `${i * 0.03}s` }}>
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-bold text-um-text">{c.label}</span>
@@ -41,7 +64,7 @@ export default function Onboard() {
 
         {/* Memory Graph Sidebar */}
         <div className="space-y-6">
-          <div className="glass-card p-6">
+          <div className="glass-card p-6 blur-reveal" style={{ transitionDelay: "0.1s" }}>
             <h3 className="font-bold mb-4">Memory Graph</h3>
             <div className="text-3xl font-extrabold gradient-text mb-1">{totalMemories.toLocaleString()}</div>
             <div className="text-xs text-um-muted mb-5">Total memories synthesized</div>
@@ -66,7 +89,7 @@ export default function Onboard() {
             </div>
           </div>
 
-          <div className="glass-card p-6">
+          <div className="glass-card p-6 blur-reveal" style={{ transitionDelay: "0.15s" }}>
             <h3 className="font-bold mb-3">Progress</h3>
             <div className="flex items-center gap-3 mb-2">
               <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "rgba(160,130,230,0.12)" }}>

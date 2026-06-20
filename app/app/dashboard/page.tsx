@@ -32,9 +32,30 @@ export default function Dashboard() {
     });
   }, []);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e, i) => {
+          if (e.isIntersecting) setTimeout(() => e.target.classList.add("visible"), i * 50);
+        });
+      },
+      { threshold: 0.1 }
+    );
+    document.querySelectorAll(".blur-reveal").forEach((el) => observer.observe(el));
+    requestAnimationFrame(() => {
+      document.querySelectorAll(".blur-reveal").forEach((el, i) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          setTimeout(() => el.classList.add("visible"), i * 50);
+        }
+      });
+    });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="pt-24 px-6 pb-24 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-10">
+      <div className="flex items-center justify-between mb-10 blur-reveal">
         <div>
           <h1 className="text-4xl font-extrabold mb-2">Live <span className="gradient-text">Dashboard</span></h1>
           <p className="text-um-text-secondary">Real-time query log, balances, and NFT status.</p>
@@ -52,8 +73,8 @@ export default function Dashboard() {
           { label: "Queries Used", value: `${stats.queries_used ?? 3} / ${(stats.queries_used ?? 3) + (stats.queries_remaining ?? 17)}` },
           { label: "USDC Spent", value: `$${(stats.usdc_spent ?? 0.003).toFixed(3)}` },
           { label: "USDC Remaining", value: `$${(stats.usdc_remaining ?? 0.497).toFixed(3)}` },
-        ].map((s) => (
-          <div key={s.label} className="glass-card p-5">
+        ].map((s, i) => (
+          <div key={s.label} className="glass-card p-5 blur-reveal" style={{ transitionDelay: `${i * 0.05}s` }}>
             <div className="text-xs text-um-muted mb-1">{s.label}</div>
             <div className="text-2xl font-extrabold gradient-text">{s.value}</div>
           </div>
@@ -62,7 +83,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Query Log */}
-        <div className="lg:col-span-2 glass-card p-6">
+        <div className="lg:col-span-2 glass-card p-6 blur-reveal" style={{ transitionDelay: "0.1s" }}>
           <h3 className="font-bold mb-4">Query Log</h3>
           <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-thin pr-2">
             {DEMO_QUERIES.map((q) => (
@@ -88,7 +109,7 @@ export default function Dashboard() {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <div className="glass-card p-6">
+          <div className="glass-card p-6 blur-reveal" style={{ transitionDelay: "0.15s" }}>
             <h3 className="font-bold mb-4">NFT Status</h3>
             <div className="flex items-center gap-3 mb-4">
               <div className={`w-3 h-3 rounded-full ${stats.nft_status === "active" ? "bg-emerald-400 animate-pulse-glow" : "bg-red-400"}`} />
@@ -103,7 +124,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="glass-card p-6">
+          <div className="glass-card p-6 blur-reveal" style={{ transitionDelay: "0.2s" }}>
             <h3 className="font-bold mb-4">Memory by Platform</h3>
             <div className="space-y-2.5">
               {[

@@ -41,6 +41,26 @@ export async function getMcpManifest() {
   return get("/.well-known/mcp");
 }
 
+// ── Consent API (Team A implements these endpoints) ────────────────────────────────
+export async function revokeConsent(tokenId: string) {
+  return post("/api/revoke", { token_id: tokenId });
+}
+
+export async function mintConsent(body: {
+  agent_id: string;
+  allowed_platforms: string[];
+  allowed_memory_types: string[];
+  max_queries: number;
+  max_usdc_budget: number;
+  expires_days: number;
+}) {
+  return post("/api/mint", body);
+}
+
+export async function getConsentStatus(tokenId: string) {
+  return get(`/api/consent/${tokenId}`);
+}
+
 // ── Mock data for when backend is unavailable ─────────────────────────────────
 export const MOCK_MEMORY_STATS = {
   result: {
